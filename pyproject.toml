@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "writing-assistant"
+version = "0.1.0"
+description = ""
+authors = ["Ahmed Besbes"]
+readme = "README.md"
+packages = [{include = "writing_assistant"}]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.9.7 || >3.9.7,<4.0"
+langchain = "^0.0.174"
+python-dotenv = "^1.0.0"
+openai = "^0.27.7"
+simple-term-menu = "^1.6.1"
+azure-core = "^1.26.4"
+rich = "^13.3.5"
+streamlit = "^1.22.0"
+praw = "^7.7.0"
+chromadb = "^0.3.25"
+tiktoken = "^0.4.0"
+tweepy = "^4.14.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
