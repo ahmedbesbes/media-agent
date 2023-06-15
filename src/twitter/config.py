@@ -1,1 +1,0 @@
-NUMBER_TWEETS = 10

@@ -2,20 +2,17 @@ import os
 from rich.console import Console
 from langchain.vectorstores import Chroma
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.chains import RetrievalQAWithSourcesChain
-from langchain.chat_models import ChatOpenAI
 import chromadb
 from chromadb.config import Settings
 from src.common.spinner import Spinner
 from src.twitter import logger
-from src.twitter.utils import (
+from src.twitter.utils.chains import get_retrieval_qa_chain
+from src.twitter.utils.data_processing import (
     get_texts_from_documents,
     get_metadatas_from_documents,
-    display_bot_answer,
 )
-from src.twitter.document_loader import TwitterTweetLoader
-
-##
+from src.twitter.utils.display import display_bot_answer
+from src.twitter.utils.document_loader import TwitterTweetLoader
 
 
 class TwitterScraper(object):
@@ -53,10 +50,6 @@ class TwitterScraper(object):
     def init_docsearch(self):
         texts = get_texts_from_documents(self.loaded_documents)
         metadatas = get_metadatas_from_documents(self.loaded_documents)
-
-        print(f"text 0: {texts[0]}")
-        print(f"metadatas 0: {metadatas[0]}")
-
         docsearch = Chroma.from_texts(
             texts,
             self.embeddings,
@@ -65,11 +58,7 @@ class TwitterScraper(object):
         )
         if self.persist_db:
             docsearch.persist()
-        self.chain = RetrievalQAWithSourcesChain.from_chain_type(
-            ChatOpenAI(temperature=0),
-            chain_type="stuff",
-            retriever=docsearch.as_retriever(),
-        )
+        self.chain = get_retrieval_qa_chain(docsearch.as_retriever())
         self.client = chromadb.Client(
             Settings(
                 chroma_db_impl="duckdb+parquet",
