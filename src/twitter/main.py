@@ -1,33 +1,35 @@
 from dotenv import load_dotenv
 from rich.prompt import Prompt
 from src.twitter.utils.display import (
-    select_number_of_tweets_per_account,
+    select_number_of_tweets,
     select_topic,
-    select_twitter_accounts_from_menu,
+    select_search_queries,
 )
-from src.twitter.utils.twitter_scraper import TwitterScraper
+from src.twitter.utils.twitter_agent import TwitterAgent
 
 load_dotenv()
 
 
 def main():
     topic = select_topic()
-    twitter_accounts = select_twitter_accounts_from_menu(topic)
-    number_of_tweets_per_account = select_number_of_tweets_per_account()
+    keywords, twitter_users = select_search_queries(topic)
+    number_of_tweets_per_account = select_number_of_tweets()
 
-    twitter_scraper = TwitterScraper(
-        twitter_users=twitter_accounts,
+    twitter_agent = TwitterAgent(
+        twitter_users=twitter_users,
+        keywords=keywords,
         number_tweets=number_of_tweets_per_account,
     )
 
-    twitter_scraper.load_tweets()
-    twitter_scraper.init_docsearch()
+    twitter_agent.load_tweets()
+    twitter_agent.init_docsearch()
+    structured_summary = twitter_agent.summarize()
 
     while True:
         input_question = Prompt.ask(
-            f"[bold red]Ask the db to learn about {'|'.join(twitter_accounts)} 💬[/bold red]"
+            f"[bold red]Ask the db to learn more about the extracted tweets  💬 (you can type q1, q2 or q3 as well)[/bold red]"
         )
-        twitter_scraper.ask_the_db(input_question)
+        twitter_agent.ask_the_db(input_question, structured_summary)
 
 
 if __name__ == "__main__":

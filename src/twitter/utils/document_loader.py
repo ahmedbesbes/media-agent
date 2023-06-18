@@ -1,10 +1,14 @@
 """Twitter document loader."""
 from __future__ import annotations
-
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Union
 
 from langchain.docstore.document import Document
 from langchain.document_loaders.base import BaseLoader
+
+from src.twitter.utils.search import (
+    search_tweets_by_keywords,
+    search_tweets_by_usernames,
+)
 
 if TYPE_CHECKING:
     import tweepy
@@ -34,51 +38,67 @@ class TwitterTweetLoader(BaseLoader):
     def __init__(
         self,
         auth_handler: Union[OAuthHandler, OAuth2BearerHandler],
-        twitter_users: Sequence[str],
+        twitter_users: Union[Sequence[str], None],
+        keywords: Union[str, None],
         number_tweets: Optional[int] = 100,
     ):
         self.auth = auth_handler
         self.twitter_users = twitter_users
         self.number_tweets = number_tweets
+        self.keywords = keywords
 
-    def load(self) -> List[Document]:
+        if self.keywords is None and self.twitter_users is None:
+            raise ValueError("You should set keywords or twitter_users, not both.")
+        if self.keywords is not None:
+            self.search_mode = "keywords"
+        else:
+            self.search_mode = "twitter_users"
+
+    def load(self):
         """Load tweets."""
         tweepy = _dependable_tweepy_import()
         api = tweepy.API(self.auth, parser=tweepy.parsers.JSONParser())
 
         results: List[Document] = []
-        for username in self.twitter_users:
-            tweets = api.user_timeline(
-                screen_name=username,
-                count=self.number_tweets,
-                tweet_mode="extended",
+
+        if self.search_mode == "twitter_users":
+            tweets = search_tweets_by_usernames(
+                api,
+                self.twitter_users,
+                self.number_tweets,
             )
-            user = api.get_user(screen_name=username)
-            docs = self._format_tweets(tweets, user)
-            results.extend(docs)
+        elif self.search_mode == "keywords":
+            tweets = search_tweets_by_keywords(
+                api,
+                self.keywords,
+                self.number_tweets,
+            )
+
+        results = self._format_tweets(tweets)
         return results
 
-    def _format_tweets(
-        self, tweets: List[Dict[str, Any]], user_info: dict
-    ) -> Iterable[Document]:
+    def _format_tweets(self, tweets: List[Dict[str, Any]]):
         """Format tweets into a string."""
+        documents = []
         for tweet in tweets:
             metadata = {
                 "created_at": tweet["created_at"],
                 "tweet_id": tweet["id"],
-                "user_info": user_info,
             }
 
-            yield Document(
+            document = Document(
                 page_content=tweet["full_text"],
                 metadata=metadata,
             )
+            documents.append(document)
+        return documents
 
     @classmethod
     def from_bearer_token(
         cls,
         oauth2_bearer_token: str,
         twitter_users: Sequence[str],
+        keywords: Union[str, None],
         number_tweets: Optional[int] = 100,
     ) -> TwitterTweetLoader:
         """Create a TwitterTweetLoader from OAuth2 bearer token."""
@@ -87,6 +107,7 @@ class TwitterTweetLoader(BaseLoader):
         return cls(
             auth_handler=auth,
             twitter_users=twitter_users,
+            keywords=keywords,
             number_tweets=number_tweets,
         )
 
@@ -98,6 +119,7 @@ class TwitterTweetLoader(BaseLoader):
         consumer_key: str,
         consumer_secret: str,
         twitter_users: Sequence[str],
+        keywords: Union[str, None],
         number_tweets: Optional[int] = 100,
     ) -> TwitterTweetLoader:
         """Create a TwitterTweetLoader from access tokens and secrets."""
@@ -111,5 +133,6 @@ class TwitterTweetLoader(BaseLoader):
         return cls(
             auth_handler=auth,
             twitter_users=twitter_users,
+            keywords=keywords,
             number_tweets=number_tweets,
         )

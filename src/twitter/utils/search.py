@@ -1,6 +1,8 @@
 import os
 from functools import lru_cache
 import tweepy
+from src.twitter import logger
+from src.twitter.utils.config import BLACKLIST, SEARCH_FILTERS
 
 
 @lru_cache(maxsize=None)
@@ -34,3 +36,41 @@ def search_users(q, count):
         extracted_users.append(extracted_user)
 
     return extracted_users
+
+
+def search_tweets_by_usernames(api: tweepy.API, twitter_users, number_tweets):
+    tweets = []
+    for username in twitter_users:
+        tweets_by_username = api.user_timeline(
+            screen_name=username,
+            count=number_tweets,
+            tweet_mode="extended",
+        )
+        tweets.extend(tweets_by_username)
+    return tweets
+
+
+def prepare_query(keywords):
+    q = f"{keywords}"
+
+    for black_listed_kw in BLACKLIST:
+        q += f" -{black_listed_kw}"
+
+    for filter in SEARCH_FILTERS:
+        q += f" -filter:{filter}"
+
+    logger.info(f"prepared query : {q}")
+    return q
+
+
+def search_tweets_by_keywords(api: tweepy.API, keywords, number_tweets):
+    q = prepare_query(keywords)
+    tweets = api.search_tweets(
+        q=q,
+        count=number_tweets,
+        tweet_mode="extended",
+        lang="en",
+    )
+    tweets = tweets["statuses"]
+
+    return tweets

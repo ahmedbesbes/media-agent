@@ -1,5 +1,5 @@
 from rich.console import Console
-from rich.prompt import Prompt
+from rich.prompt import Prompt, Confirm
 from simple_term_menu import TerminalMenu
 from src.common.spinner import Spinner
 from src.twitter.utils.search import search_users
@@ -41,28 +41,43 @@ def select_topic():
     return topic
 
 
-def select_twitter_accounts_from_menu(topic):
-    with Spinner(
-        text_message="Finding relevant Twitter accounts that tweet about this topic"
-    ):
-        users = search_users(q=topic, count=10)
-
-    options = [f"{user['screen_name']} ({user['followers_count']})" for user in users]
-
-    terminal_menu = TerminalMenu(
-        options,
-        multi_select=True,
-        show_multi_select_hint=True,
-        multi_select_cursor="x ",
-        title="Select one or more Twitter accounts to load the data from: \n",
+def select_search_queries(topic):
+    search_type = Prompt.ask(
+        "Enter a search type",
+        choices=["keywords", "accounts"],
+        default="keywords",
     )
 
-    menu_entry_indices = terminal_menu.show()
-    twitter_users = [users[i]["screen_name"] for i in menu_entry_indices]
-    return twitter_users
+    if search_type == "accounts":
+        with Spinner(
+            text_message="Finding relevant Twitter accounts that tweet about this topic"
+        ):
+            users = search_users(q=topic, count=10)
+
+        options = [
+            f"{user['screen_name']} ({user['followers_count']})" for user in users
+        ]
+
+        terminal_menu = TerminalMenu(
+            options,
+            multi_select=True,
+            show_multi_select_hint=True,
+            multi_select_cursor="x ",
+            title="Select one or more Twitter accounts to load the data from: \n",
+        )
+
+        menu_entry_indices = terminal_menu.show()
+        twitter_users = [users[i]["screen_name"] for i in menu_entry_indices]
+        keywords = None
+
+    elif search_type == "keywords":
+        twitter_users = None
+        keywords = topic
+
+    return keywords, twitter_users
 
 
-def select_number_of_tweets_per_account():
+def select_number_of_tweets():
     default_tweet_number = 10
     error = True
     i = 0
@@ -82,3 +97,14 @@ def select_number_of_tweets_per_account():
         i += 1
 
     return number_of_tweets
+
+
+def display_summary_and_questions(summary, q1, q2, q3):
+    console.print("Summary : \n", style="red bold underline")
+    console.print(summary + "\n ")
+    console.print(
+        "Possible question to start the chat : \n", style="red bold underline"
+    )
+    console.print(f"q1: {q1}")
+    console.print(f"q2: {q2}")
+    console.print(f"q3: {q3}")
