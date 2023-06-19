@@ -1,3 +1,4 @@
+from atexit import register
 import logging
 import click
 from rich.logging import RichHandler
@@ -16,3 +17,8 @@ logging.getLogger("clickhouse_connect").setLevel(logging.ERROR)
 logging.getLogger("clickhouse_connect").setLevel(logging.ERROR)
 logging.getLogger("numexpr").setLevel(logging.ERROR)
 # logging.getLogger("chromadb").setLevel(logging.ERROR)
+
+
+@register
+def bye():
+    print("Bye!")
