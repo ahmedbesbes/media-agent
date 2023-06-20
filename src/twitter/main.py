@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from rich.prompt import Prompt
 from src.twitter.utils.display import (
+    display_intro,
     select_number_of_tweets,
     select_topic,
     select_search_queries,
@@ -11,6 +12,7 @@ load_dotenv()
 
 
 def main():
+    display_intro()
     topic = select_topic()
     keywords, twitter_users = select_search_queries(topic)
     number_of_tweets_per_account = select_number_of_tweets()

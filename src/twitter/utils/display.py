@@ -7,6 +7,38 @@ from src.twitter.utils.search import search_users
 console = Console()
 
 
+def display_intro():
+    message = """
+______________________________________________________________________________________________ 
+
+ _____        _ _   _               ___                   _   
+|_   _|      (_| | | |             / _ \                 | |  
+  | __      ___| |_| |_ ___ _ __  / /_\ \ __ _  ___ _ __ | |_ 
+  | \ \ /\ / | | __| __/ _ | '__| |  _  |/ _` |/ _ | '_ \| __|
+  | |\ V  V /| | |_| ||  __| |    | | | | (_| |  __| | | | |_ 
+  \_/ \_/\_/ |_|\__|\__\___|_|    \_| |_/\__, |\___|_| |_|\__|
+                                          __/ |               
+                                         |___/                
+______________________________________________________________________________________________     
+    """
+    console.print(message, style="red bold")
+
+    console.print(
+        """
+Twitter Agent is built with Langchain and leverages the power of [red]Large Language Models (LLMs)[/red]. 
+Twitter Agent pulls data for you from Twitter, embeds it into a Chroma database and allows you to chat 
+with it. 
+
+Yes you heard it. Chat with your data 😎
+
+Let's start :rocket:
+
+***********************************************************************************************
+    """,
+        style="bold",
+    )
+
+
 def display_bot_answer(result, collection):
     console.print("Answer :", style="red bold underline")
     console.print(result["answer"], style="yellow")
