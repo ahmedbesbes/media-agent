@@ -9,7 +9,7 @@ console = Console()
 
 def display_intro():
     message = """
-______________________________________________________________________________________________ 
+_____________________________________________________________________________________________________________ 
 
  _____        _ _   _               ___                   _   
 |_   _|      (_| | | |             / _ \                 | |  
@@ -19,23 +19,34 @@ ________________________________________________________________________________
   \_/ \_/\_/ |_|\__|\__\___|_|    \_| |_/\__, |\___|_| |_|\__|
                                           __/ |               
                                          |___/                
-______________________________________________________________________________________________     
+_____________________________________________________________________________________________________________   
     """
     console.print(message, style="red bold")
 
     console.print(
         """
-Twitter Agent is built with Langchain and leverages the power of [red]Large Language Models (LLMs)[/red]. 
-Twitter Agent pulls data for you from Twitter, embeds it into a Chroma database and allows you to chat 
-with it. 
+Twitter Agent scrapes tweets from Twitter and leverages the power of [red]Large Language Models (LLMs)[/red] 
+to interactively chat with the extracted data 💬, summarize it 📝 and provide conversation ideas 💡.
 
-Yes you heard it. Chat with your data 😎
+Twitter Agent helps quickly interact with real-time data to gather insights and later reuse them. 
+
+Link to demo available in the project's readme
+
+Libraries and tools used: 
+    * [bold]Langchain 🦜[/bold] to build and compose LLMs
+    * [bold]ChromaDB[/bold] to store vectors (a.k.a [italic]embeddings[/italic]) and query them to build conversational bots
+    * [bold]Tweepy[/bold] to connect to your Twitter account to pull Tweets and more
+    * [bold]Rich[/bold] to build a cool terminal interface
+    * [bold]Poetry[/bold] to manage dependencies
+
+Third party services:   
+    * [bold]OpenAI[/bold] (🔑 needed)
+    * [bold]Twitter[/bold] (🔑 needed)
+
+*************************************************************************************************************
 
 Let's start :rocket:
-
-***********************************************************************************************
     """,
-        style="bold",
     )
 
 
@@ -44,9 +55,6 @@ def display_bot_answer(result, collection):
     console.print(result["answer"], style="yellow")
 
     sources = result["sources"]
-
-    print("sources : ")
-    console.print(sources)
 
     sources = sources.split(",")
     sources = [source.strip() for source in sources]
@@ -59,11 +67,29 @@ def display_bot_answer(result, collection):
     else:
         output = collection.get(
             where={"$or": [{"source": {"$eq": source}} for source in sources]},
-            include=["metadatas"],
+            include=["metadatas", "documents"],
         )
 
     console.print("These are sources I used to create my answer:")
-    console.print(output["metadatas"])
+    metadatas = output["metadatas"]
+    documents = output["documents"]
+
+    if len(metadatas) == 0 or len(documents) == 0:
+        console.print(
+            "No data is available to answer this question. Please review your query."
+        )
+    else:
+        for document, metadata in zip(documents, metadatas):
+            console.print("Document :\n", style="blue bold underline")
+            console.print(document)
+            console.print("\n")
+            console.print("metadatas :\n", style="blue bold underline")
+            console.print(
+                {
+                    "metadata": metadata,
+                }
+            )
+            console.print(f"\n {'-'*50} \n")
 
 
 def select_topic():
