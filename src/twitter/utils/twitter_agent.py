@@ -38,7 +38,9 @@ class TwitterAgent(object):
         self.history = {"history": []}
 
         def save_history():
-            self.console.log("Saving history ...")
+            self.console.log(
+                "Saving conversation history with sources and metadata ..."
+            )
             with open("history.json", "w") as f:
                 json.dump(self.history, f)
 
@@ -125,6 +127,10 @@ class TwitterAgent(object):
         return structured_summary
 
     def ask_the_db(self, user_input, structured_summary):
+        if user_input.lower() == "q":
+            self.console.log("Exiting program. Bye :wave:")
+            sys.exit()
+
         if user_input in structured_summary:
             user_input = structured_summary[user_input]
             self.console.print(f"[bold purple]{user_input}[/bold purple] \n")

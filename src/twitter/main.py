@@ -29,7 +29,7 @@ def main():
 
     while True:
         input_question = Prompt.ask(
-            f"[bold red]Ask the db to learn more about the extracted tweets  💬 (you can type q1, q2 or q3 as well)[/bold red]"
+            f"[bold red]Ask the db to learn more about the extracted tweets  💬 (you can type q1, q2 or q3 as well) or type `q` to quit[/bold red]"
         )
         twitter_agent.ask_the_db(input_question, structured_summary)
 
