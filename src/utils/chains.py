@@ -3,7 +3,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.chains.summarize import load_summarize_chain
 from langchain.prompts import PromptTemplate
 from langchain.docstore.document import Document
-from src.twitter.utils.prompts import summarization_template
+from src.utils.prompts import summarization_template
 
 
 def get_retrieval_qa_chain(retriever):

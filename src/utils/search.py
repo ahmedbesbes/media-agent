@@ -1,8 +1,8 @@
 import os
 from functools import lru_cache
 import tweepy
-from src.twitter import logger
-from src.twitter.utils.config import BLACKLIST, SEARCH_FILTERS
+from src import logger
+from src.utils.config import BLACKLIST, SEARCH_FILTERS
 
 
 @lru_cache(maxsize=None)

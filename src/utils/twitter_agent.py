@@ -7,14 +7,14 @@ from langchain.vectorstores import Chroma
 from langchain.embeddings.openai import OpenAIEmbeddings
 import chromadb
 from chromadb.config import Settings
-from src.twitter import logger
-from src.twitter.utils.chains import get_retrieval_qa_chain, summarize_tweets
-from src.twitter.utils.data_processing import (
+from src import logger
+from src.utils.chains import get_retrieval_qa_chain, summarize_tweets
+from src.utils.data_processing import (
     get_texts_from_documents,
     get_metadatas_from_documents,
 )
-from src.twitter.utils.display import display_bot_answer, display_summary_and_questions
-from src.twitter.utils.document_loader import TwitterTweetLoader
+from src.utils.display import display_bot_answer, display_summary_and_questions
+from src.utils.document_loader import TwitterTweetLoader
 
 
 class TwitterAgent(object):

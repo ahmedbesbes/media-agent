@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence,
 from langchain.docstore.document import Document
 from langchain.document_loaders.base import BaseLoader
 
-from src.twitter.utils.search import (
+from src.utils.search import (
     search_tweets_by_keywords,
     search_tweets_by_usernames,
 )

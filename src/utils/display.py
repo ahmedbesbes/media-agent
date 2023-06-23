@@ -1,7 +1,7 @@
 from rich.console import Console
 from rich.prompt import Prompt
 from simple_term_menu import TerminalMenu
-from src.twitter.utils.search import search_users
+from src.utils.search import search_users
 
 console = Console()
 

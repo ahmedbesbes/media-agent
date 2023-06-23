@@ -1,0 +1,84 @@
+{
+    "history": [
+        {
+            "question": "What are the SOLID principles, and how do they improve object-oriented design in Python?",
+            "answer": {
+                "answer": "The SOLID principles are five well-established standards for improving object-oriented design in Python. They are not further explained in the given content. \n",
+                "sources": "1671571308256034832"
+            },
+            "sources": [
+                {
+                    "document": "\ud83d\udc0d\ud83d\udcf0 SOLID Principles: Improve Object-Oriented Design in Python\n\nIn this tutorial, you'll learn about the SOLID principles, which are five well-established standards for improving your object-oriented design in Python\n\n#python https://t.co/Sq2DfJxA8z",
+                    "metadata": {
+                        "created_at": "Wed Jun 21 17:30:30 +0000 2023",
+                        "source": 1671571308256034832
+                    }
+                }
+            ]
+        },
+        {
+            "question": "What is the purpose of the Python mmap package, and how does it relate to file I/O?",
+            "answer": {
+                "answer": "The purpose of the Python mmap package is to allow for file I/O using memory mapping. It provides a way to access files as if they were in memory, allowing for faster and more efficient I/O operations. \n",
+                "sources": "1671337175508566019"
+            },
+            "sources": [
+                {
+                    "document": "\ud83d\udc0d Python mmap: Doing File I/O With Memory Mapping [Video] \ud83d\udcfa\n#python https://t.co/gLb7oWQbPP",
+                    "metadata": {
+                        "created_at": "Wed Jun 21 02:00:09 +0000 2023",
+                        "source": 1671337175508566019
+                    }
+                }
+            ]
+        },
+        {
+            "question": "what other topics are discussed?",
+            "answer": {
+                "answer": "The topics discussed are creating effective documentation, metaclasses in Python, and PyCoder's Weekly Issue #582. \n",
+                "sources": "1672051851095691264, 1671601466404921361, 1671531280817635331, 1671243290207764480"
+            },
+            "sources": [
+                {
+                    "document": "RT @pycoders: Tips for Creating Effective Documentation? https://t.co/Qx09mjLi8z",
+                    "metadata": {
+                        "created_at": "Fri Jun 23 01:20:01 +0000 2023",
+                        "source": 1672051851095691264
+                    }
+                },
+                {
+                    "document": "Metaclasses in Python #python https://t.co/CyjhKB0RLC",
+                    "metadata": {
+                        "created_at": "Wed Jun 21 19:30:21 +0000 2023",
+                        "source": 1671601466404921361
+                    }
+                },
+                {
+                    "document": "@jlamigueiro Thanks for sharing! :)",
+                    "metadata": {
+                        "created_at": "Wed Jun 21 14:51:27 +0000 2023",
+                        "source": 1671531280817635331
+                    }
+                },
+                {
+                    "document": "\ud83d\udc0d\ud83d\udcf0 PyCoder\u2019s Weekly Issue #582 (June 20, 2023) https://t.co/fMRDMohVoL",
+                    "metadata": {
+                        "created_at": "Tue Jun 20 19:47:05 +0000 2023",
+                        "source": 1671243290207764480
+                    }
+                }
+            ]
+        }
+    ],
+    "search_type": "twitter_accounts",
+    "input_query": [
+        "realpython"
+    ],
+    "num_tweets": 50,
+    "summary_metadata": {
+        "summary": "The tweets cover various topics related to Python programming, including tutorials, videos, quizzes, and articles. Some of the topics include recursion, data types, documentation, object-oriented programming, and more.",
+        "q1": "What is the purpose of the Rich library in the Wordle clone project?",
+        "q2": "What are the SOLID principles, and how do they improve object-oriented design in Python?",
+        "q3": "What is the purpose of the Python mmap package, and how does it relate to file I/O?"
+    }
+}
