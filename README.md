@@ -1,8 +1,46 @@
-* Install dependencies
+## Twitter Agent 
+
+I'm always looking for tools to digest the news and provide ideas. So I built one.
+
+![twitter-agent](./assets/twitter_agent.png)
+
+Twitter Agent scrapes data from Twitter and leverages the power of Large Language Models (LLMs) to interactively chat with the extracted tweets 💬, summarize them 📝 and provide conversation ideas 💡.
+
+Twitter Agent helps you quickly gather insights on real-time events such as news, build a technical knowledge
+on your favourite programming language or research any topic that interests you.
+
+### Functionalities
+
+- Scrapes tweets on your behalf either from a list of 
+user accounts or a list of keywords.
+- Embeds the tweets using OpenAI 
+- Indexes the embeddings (i.e. *vectors*) in ChromaDB
+- Enriches the index with additional metadata
+- Creates a summary of the tweets and provides  potential questions to answer
+- Opens a chat session on top of the tweets
+- Saves the conversation with its metadata
+- A rich terminal UI and logging features
+
+
+### Tools and libraries used
+
+* **Langchain** 🦜 to build and compose LLMs
+* **ChromaDB** to store vectors (a.k.a embeddings) and query them to build conversational bots
+* **Tweepy** to connect to your the Twitter API and extract Tweets and metadata
+* **Rich** to build a cool terminal UX/UI
+* **Poetry** to manage dependencies
+
+### Third party services
+* OpenAI (🔑 needed)
+* Twitter (🔑 needed)
+
+### Run the app locally
+
+* Install dependencies with poetry
 
 poetry install --with dev
 
-* Add credentials
+* Add API credentials
 
 Create .env file at the root of the project with the following keys:
 
@@ -16,42 +54,15 @@ TWITTER_BEARER_TOKEN=<TWITTER BEARER TOKEN>
 More info on these credentials [here](https://openai.com/) and [here](https://developer.twitter.com/en/docs/apps/overview).
 
 
-* Run the app locally
+### Future features:
 
-```shell
-make run-twitter-agent
+This is an on-going project, so feel free to contribute:
 
-________________________________________________________________________
+Here's what I plan in the near future:
 
- _____        _ _   _               ___                   _   
-|_   _|      (_| | | |             / _ \                 | |  
-  | __      ___| |_| |_ ___ _ __  / /_\ \ __ _  ___ _ __ | |_ 
-  | \ \ /\ / | | __| __/ _ | '__| |  _  |/ _` |/ _ | '_ \| __|
-  | |\ V  V /| | |_| ||  __| |    | | | | (_| |  __| | | | |_ 
-  \_/ \_/\_/ |_|\__|\__\___|_|    \_| |_/\__, |\___|_| |_|\__|
-                                          __/ |               
-                                         |___/                
-________________________________________________________________________   
-
-
-Twitter Agent scrapes data from Twitter and leverages the power of [red]Large Language Models (LLMs)[/red] 
-to interactively chat with the extracted tweets 💬, summarize them 📝 and provide conversation ideas 💡.
-
-Twitter Agent helps you quickly gather insights on real-time events such as news, build a technical knowledge
-on your favourite programming language or research any topic that interests you. 
-
-Tools and libraries used: 
-    * [bold]Langchain 🦜[/bold] to build and compose LLMs
-    * [bold]ChromaDB[/bold] to store vectors (a.k.a [italic]embeddings[/italic]) and query them to build conversational bots
-    * [bold]Tweepy[/bold] to connect to your the Twitter API and extract Tweets and metadata
-    * [bold]Rich[/bold] to build a cool terminal UX/UI
-    * [bold]Poetry[/bold] to manage dependencies
-
-Third party services:   
-    * [bold]OpenAI[/bold] (🔑 needed)
-    * [bold]Twitter[/bold] (🔑 needed)
-
-*************************************************************************************************************
-
-Let's start :rocket:
-```
+* support other LLMs (Falcon?)
+* support Pinecone as an alternative to ChromaDB
+* support Twint as an alternative to Tweepy (in case the Twitter API reaches its limit in terms of calls)
+* add instructions to deployment on a cloud infrastructure
+* improve the prompts to have a more engaging/enriching conversations
+* add actions to open URLs and fetch content from it
