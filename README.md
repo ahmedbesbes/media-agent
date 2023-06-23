@@ -20,7 +20,7 @@ More info on these credentials [here](https://openai.com/) and [here](https://de
 
 ```shell
 make run-twitter-agent
-```
+
 ________________________________________________________________________
 
  _____        _ _   _               ___                   _   
@@ -54,7 +54,4 @@ Third party services:
 *************************************************************************************************************
 
 Let's start :rocket:
-```
-
-
 ```
