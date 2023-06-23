@@ -1,7 +1,6 @@
 from rich.console import Console
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Prompt
 from simple_term_menu import TerminalMenu
-from src.common.spinner import Spinner
 from src.twitter.utils.search import search_users
 
 console = Console()
@@ -25,18 +24,17 @@ ________________________________________________________________________________
 
     console.print(
         """
-Twitter Agent scrapes tweets from Twitter and leverages the power of [red]Large Language Models (LLMs)[/red] 
-to interactively chat with the extracted data 💬, summarize it 📝 and provide conversation ideas 💡.
+Twitter Agent scrapes data from Twitter and leverages the power of [red]Large Language Models (LLMs)[/red] 
+to interactively chat with the extracted tweets 💬, summarize them 📝 and provide conversation ideas 💡.
 
-Twitter Agent helps quickly interact with real-time data to gather insights and later reuse them. 
+Twitter Agent helps you quickly gather insights on real-time events such as news, build a technical knowledge
+on your favourite programming language or research any topic that interests you. 
 
-Link to demo available in the project's readme
-
-Libraries and tools used: 
+Tools and libraries used: 
     * [bold]Langchain 🦜[/bold] to build and compose LLMs
     * [bold]ChromaDB[/bold] to store vectors (a.k.a [italic]embeddings[/italic]) and query them to build conversational bots
-    * [bold]Tweepy[/bold] to connect to your Twitter account to pull Tweets and more
-    * [bold]Rich[/bold] to build a cool terminal interface
+    * [bold]Tweepy[/bold] to connect to your the Twitter API and extract Tweets and metadata
+    * [bold]Rich[/bold] to build a cool terminal UX/UI
     * [bold]Poetry[/bold] to manage dependencies
 
 Third party services:   
@@ -79,16 +77,13 @@ def display_bot_answer(result, collection):
             "No data is available to answer this question. Please review your query."
         )
     else:
-        for document, metadata in zip(documents, metadatas):
+        for i, (document, metadata) in enumerate(zip(documents, metadatas)):
+            console.rule(f"Source {i+1}", style="red")
             console.print("Document :\n", style="blue bold underline")
             console.print(document)
             console.print("\n")
             console.print("metadatas :\n", style="blue bold underline")
-            console.print(
-                {
-                    "metadata": metadata,
-                }
-            )
+            console.print(metadata)
             console.print(f"\n {'-'*50} \n")
 
 
@@ -107,8 +102,11 @@ def select_search_queries(topic):
     )
 
     if search_type == "accounts":
-        with Spinner(
-            text_message="Finding relevant Twitter accounts that tweet about this topic"
+        with console.status(
+            "Finding relevant Twitter accounts that tweet about this topic \n",
+            spinner="aesthetic",
+            speed=1.5,
+            spinner_style="red",
         ):
             users = search_users(q=topic, count=10)
 
@@ -158,11 +156,9 @@ def select_number_of_tweets():
 
 
 def display_summary_and_questions(summary, q1, q2, q3):
-    console.print("Summary : \n", style="red bold underline")
+    console.print("Summary 📝 \n", style="red bold underline")
     console.print(summary + "\n ")
-    console.print(
-        "Possible question to start the chat : \n", style="red bold underline"
-    )
-    console.print(f"q1: {q1}")
-    console.print(f"q2: {q2}")
-    console.print(f"q3: {q3}")
+    console.print("Questions to start the chat 🔮 \n", style="red bold underline")
+    console.print(f"q1: {q1} \n")
+    console.print(f"q2: {q2} \n")
+    console.print(f"q3: {q3} \n")

@@ -6,7 +6,6 @@ from langchain.vectorstores import Chroma
 from langchain.embeddings.openai import OpenAIEmbeddings
 import chromadb
 from chromadb.config import Settings
-from src.common.spinner import Spinner
 from src.twitter import logger
 from src.twitter.utils.chains import get_retrieval_qa_chain, summarize_tweets
 from src.twitter.utils.data_processing import (
@@ -47,7 +46,12 @@ class TwitterAgent(object):
 
     def load_tweets(self):
         loader = self._get_tweets_loader()
-        with Spinner(text_message="Loading Tweets"):
+        with self.console.status(
+            "Loading Tweets",
+            spinner="aesthetic",
+            speed=1.5,
+            spinner_style="red",
+        ):
             documents = loader.load()
         logger.info(f"{len(documents)} tweets are loaded ...")
         self.loaded_documents = documents
@@ -75,7 +79,12 @@ class TwitterAgent(object):
 
     def summarize(self):
         if self.loaded_documents is not None:
-            with Spinner(text_message="Generating a summary of the loaded tweets"):
+            with self.console.status(
+                "Generating a summary of the loaded tweets ... ⌛ \n",
+                spinner="aesthetic",
+                speed=1.5,
+                spinner_style="red",
+            ):
                 summary = summarize_tweets(self.loaded_documents)
         else:
             raise ValueError("Document are not loaded yet. Run `load_tweets` first.")
@@ -96,11 +105,14 @@ class TwitterAgent(object):
     def ask_the_db(self, user_input, structured_summary):
         if user_input in structured_summary:
             user_input = structured_summary[user_input]
-            self.console.print(
-                f"[bold purple]You picked this question : {user_input}[/bold purple]"
-            )
+            self.console.print(f"[bold purple]{user_input}[/bold purple] \n")
 
-        with Spinner():
+        with self.console.status(
+            "Generating answer with relevant sources \n",
+            spinner="aesthetic",
+            speed=1.5,
+            spinner_style="red",
+        ):
             result = self.chain(
                 {"question": user_input},
                 return_only_outputs=True,
