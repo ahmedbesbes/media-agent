@@ -48,7 +48,7 @@ Let's start :rocket:
     )
 
 
-def display_bot_answer(result, collection):
+def display_bot_answer(result, collection, history, user_input):
     console.print("Answer :", style="red bold underline")
     console.print(result["answer"], style="yellow")
 
@@ -85,6 +85,17 @@ def display_bot_answer(result, collection):
             console.print("metadatas :\n", style="blue bold underline")
             console.print(metadata)
             console.print(f"\n {'-'*50} \n")
+
+    history["history"].append(
+        {
+            "question": user_input,
+            "answer": result,
+            "sources": [
+                {"document": document, "metadata": metadata}
+                for document, metadata in zip(documents, metadatas)
+            ],
+        }
+    )
 
 
 def select_topic():

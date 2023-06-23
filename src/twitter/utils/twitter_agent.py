@@ -1,3 +1,4 @@
+import atexit
 import os
 import sys
 import json
@@ -34,6 +35,14 @@ class TwitterAgent(object):
         self.client = None
         self.collection = None
         self.console = Console()
+        self.history = {"history": []}
+
+        def save_history():
+            self.console.log("Saving history ...")
+            with open("history.json", "w") as f:
+                json.dump(self.history, f)
+
+        atexit.register(save_history)
 
     def _get_tweets_loader(self):
         loader = TwitterTweetLoader.from_bearer_token(
@@ -55,6 +64,14 @@ class TwitterAgent(object):
             documents = loader.load()
         logger.info(f"{len(documents)} tweets are loaded ...")
         self.loaded_documents = documents
+
+        self.history["search_type"] = (
+            "keywords" if self.keywords is not None else "twitter_accounts"
+        )
+        self.history["input_query"] = (
+            self.keywords if self.keywords is not None else self.twitter_users
+        )
+        self.history["num_tweets"] = len(documents)
 
     def init_docsearch(self):
         texts = get_texts_from_documents(self.loaded_documents)
@@ -100,6 +117,11 @@ class TwitterAgent(object):
         q2 = structured_summary.get("q2")
         q3 = structured_summary.get("q3")
         display_summary_and_questions(summary, q1, q2, q3)
+        self.history["summary_metadata"] = {}
+        self.history["summary_metadata"]["summary"] = summary
+        self.history["summary_metadata"]["q1"] = q1
+        self.history["summary_metadata"]["q2"] = q2
+        self.history["summary_metadata"]["q3"] = q3
         return structured_summary
 
     def ask_the_db(self, user_input, structured_summary):
@@ -117,4 +139,9 @@ class TwitterAgent(object):
                 {"question": user_input},
                 return_only_outputs=True,
             )
-        display_bot_answer(result, self.collection)
+        display_bot_answer(
+            result,
+            self.collection,
+            self.history,
+            user_input,
+        )
