@@ -40,7 +40,7 @@ class TwitterTweetLoader(BaseLoader):
         auth_handler: Union[OAuthHandler, OAuth2BearerHandler],
         twitter_users: Union[Sequence[str], None],
         keywords: Union[str, None],
-        number_tweets: Optional[int] = 100,
+        number_tweets: int,
     ):
         self.auth = auth_handler
         self.twitter_users = twitter_users
@@ -99,7 +99,7 @@ class TwitterTweetLoader(BaseLoader):
         oauth2_bearer_token: str,
         twitter_users: Sequence[str],
         keywords: Union[str, None],
-        number_tweets: Optional[int] = 100,
+        number_tweets: int,
     ) -> TwitterTweetLoader:
         """Create a TwitterTweetLoader from OAuth2 bearer token."""
         tweepy = _dependable_tweepy_import()
@@ -120,7 +120,7 @@ class TwitterTweetLoader(BaseLoader):
         consumer_secret: str,
         twitter_users: Sequence[str],
         keywords: Union[str, None],
-        number_tweets: Optional[int] = 100,
+        number_tweets: int,
     ) -> TwitterTweetLoader:
         """Create a TwitterTweetLoader from access tokens and secrets."""
         tweepy = _dependable_tweepy_import()
