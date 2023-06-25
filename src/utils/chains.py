@@ -20,7 +20,11 @@ def get_retrieval_qa_chain(retriever):
 
 def get_summarization_chain(prompt):
     llm = ChatOpenAI(temperature=0)
-    chain = load_summarize_chain(llm, chain_type="stuff", prompt=prompt)
+    chain = load_summarize_chain(
+        llm,
+        chain_type="stuff",
+        prompt=prompt,
+    )
     return chain
 
 
