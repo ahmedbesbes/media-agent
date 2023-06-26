@@ -2,7 +2,6 @@ from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.chat_models import ChatOpenAI
 from langchain.chains.summarize import load_summarize_chain
 from langchain.prompts import PromptTemplate
-from langchain.docstore.document import Document
 from src.utils.prompts import summarization_template
 
 

@@ -7,14 +7,19 @@ from langchain.vectorstores import Chroma
 from langchain.embeddings.openai import OpenAIEmbeddings
 import chromadb
 from chromadb.config import Settings
+import tiktoken
 from src import logger
-from src.utils.chains import get_retrieval_qa_chain, summarize_tweets
+from src.utils.chains import (
+    get_retrieval_qa_chain,
+    summarize_tweets,
+)
 from src.utils.data_processing import (
     get_texts_from_documents,
     get_metadatas_from_documents,
 )
 from src.utils.display import display_bot_answer, display_summary_and_questions
 from src.utils.document_loader import TwitterTweetLoader
+from src.utils.prompts import summarization_question_template, summarization_template
 
 
 class TwitterAgent(object):
@@ -55,6 +60,14 @@ class TwitterAgent(object):
         )
         return loader
 
+    def _get_number_of_tokens(self):
+        encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
+        texts = [doc.page_content for doc in self.loaded_documents]
+        text = "\n".join(texts)
+        formatted_summary_template = summarization_template.format(text=text)
+        num_tokens = len(encoding.encode(formatted_summary_template))
+        return num_tokens
+
     def load_tweets(self):
         loader = self._get_tweets_loader()
         with self.console.status(
@@ -79,15 +92,16 @@ class TwitterAgent(object):
         texts = get_texts_from_documents(self.loaded_documents)
         metadatas = get_metadatas_from_documents(self.loaded_documents)
 
-        docsearch = Chroma.from_texts(
+        self.docsearch = Chroma.from_texts(
             texts,
             self.embeddings,
             metadatas=metadatas,
             persist_directory="db",
         )
+
         if self.persist_db:
-            docsearch.persist()
-        self.chain = get_retrieval_qa_chain(docsearch.as_retriever())
+            self.docsearch.persist()
+        self.chain = get_retrieval_qa_chain(self.docsearch.as_retriever())
         self.client = chromadb.Client(
             Settings(
                 chroma_db_impl="duckdb+parquet",
@@ -98,13 +112,29 @@ class TwitterAgent(object):
 
     def summarize(self):
         if self.loaded_documents is not None:
+            num_tokens = self._get_number_of_tokens()
+            if num_tokens <= 4097:
+                method = "stuff"
+            else:
+                method = "chromadb"
+
             with self.console.status(
                 "Generating a summary of the loaded tweets ... ⌛ \n",
                 spinner="aesthetic",
                 speed=1.5,
                 spinner_style="red",
             ):
-                summary = summarize_tweets(self.loaded_documents)
+                if method == "stuff":
+                    summary = summarize_tweets(self.loaded_documents)
+
+                elif method == "chromadb":
+                    response = self.chain(
+                        {
+                            "question": summarization_question_template,
+                        },
+                    )
+                    summary = response["answer"]
+
         else:
             raise ValueError("Document are not loaded yet. Run `load_tweets` first.")
 
