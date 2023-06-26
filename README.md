@@ -1,13 +1,10 @@
 ## Twitter Agent 
+Twitter Agent is CLI that scrapes tweets, summarizes them, and chats with them in an interactive terminal.
 
-I'm always looking for tools to digest the news and provide ideas. So I built one.
+---
+
 
 ![twitter-agent](./assets/twitter_agent.png)
-
-Twitter Agent scrapes data from Twitter and leverages the power of Large Language Models (LLMs) to interactively chat with the extracted tweets 💬, summarize them 📝 and provide conversation ideas 💡.
-
-Twitter Agent helps you quickly gather insights on real-time events such as news, build a technical knowledge
-on your favourite programming language or research any topic that interests you.
 
 ### Functionalities
 
