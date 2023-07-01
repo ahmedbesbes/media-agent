@@ -1,5 +1,5 @@
-## Twitter Agent 
-Twitter Agent is CLI that scrapes tweets, summarizes them, and chats with them in an interactive terminal.
+## Twitter Reddit Agent 
+Twitter Reddit Agent is CLI that scrapes tweets/reddit submissions, summarizes them, and chats with them in an interactive terminal.
 
 ---
 
@@ -8,12 +8,12 @@ Twitter Agent is CLI that scrapes tweets, summarizes them, and chats with them i
 
 ### Functionalities
 
-- Scrapes tweets on your behalf either from a list of 
+- Scrapes tweets/submissions on your behalf either from a list of 
 user accounts or a list of keywords.
-- Embeds the tweets using OpenAI 
+- Embeds the tweets/submissions using OpenAI 
 - Indexes the embeddings (i.e. *vectors*) in ChromaDB
 - Enriches the index with additional metadata
-- Creates a summary of the tweets and provides  potential questions to answer
+- Creates a summary of the tweets/submissions and provides potential questions to answer
 - Opens a chat session on top of the tweets
 - Saves the conversation with its metadata
 - A rich terminal UI and logging features
@@ -30,6 +30,7 @@ user accounts or a list of keywords.
 ### Third party services
 * OpenAI (🔑 needed)
 * Twitter (🔑 needed)
+* Reddit (🔑 needed)
 
 ### Run the app locally
 
