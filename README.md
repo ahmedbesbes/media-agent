@@ -3,8 +3,8 @@ Twitter Reddit Agent is CLI that scrapes tweets/reddit submissions, summarizes t
 
 ---
 
+![image](https://github.com/syltruong/twitter-reddit-agent/assets/24707558/b4885c0a-b5b4-48c0-9590-ba8bb809c724)
 
-![twitter-agent](./assets/twitter_agent.png)
 
 ### Functionalities
 
