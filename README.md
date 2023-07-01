@@ -43,9 +43,10 @@ Create .env file at the root of the project with the following keys:
 
 ```
 OPENAI_API_KEY=<OPENAI KEY>
-TWITTER_API_KEY=<TWITTER API KEY>
-TWITTER_API_KEY_SECRET=<TWITTER API KEY SECRET>
 TWITTER_BEARER_TOKEN=<TWITTER BEARER TOKEN>
+REDDIT_API_CLIENT_ID=<REDDIT_API_CLIENT_ID>
+REDDIT_API_SECRET=<REDDIT_API_SECRET>
+REDDIT_USER_AGENT=<REDDIT_USER_AGENT>
 ```
 
 More info on these credentials [here](https://openai.com/) and [here](https://developer.twitter.com/en/docs/apps/overview).

@@ -1,8 +1,12 @@
+from typing import List
 import os
 from functools import lru_cache
 import tweepy
 from src import logger
 from src.utils.config import BLACKLIST, SEARCH_FILTERS
+
+from praw import Reddit
+from praw.models import Subreddit
 
 
 @lru_cache(maxsize=None)
@@ -74,3 +78,22 @@ def search_tweets_by_keywords(api: tweepy.API, keywords, number_tweets):
     tweets = tweets["statuses"]
 
     return tweets
+
+
+def search_subreddits(q, count=10) -> List[Subreddit]:
+    """Search subreddits
+
+    Parameters
+    ----------
+    q : string
+        search query
+    count : int, optional
+        max number of results, by default 10
+    """
+    reddit = Reddit(
+        client_id=os.environ.get("REDDIT_API_CLIENT_ID"),
+        client_secret=os.environ.get("REDDIT_API_SECRET"),
+        user_agent=os.environ.get("REDDIT_USER_AGENT"),
+    )
+
+    return list(reddit.subreddits.search(query=q, limit=count))
