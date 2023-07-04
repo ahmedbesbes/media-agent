@@ -43,7 +43,7 @@ class Agent(object):
             self.console.log(
                 "Saving conversation history with sources and metadata ..."
             )
-            with open("data/history.json", "w") as f:
+            with open("outputs/history.json", "w") as f:
                 json.dump(self.history, f)
 
         atexit.register(save_history)
