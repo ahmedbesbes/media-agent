@@ -5,10 +5,6 @@ def get_document_text(doc):
 
 def get_metadatas_from_documents(documents):
     metadatas = [document.metadata for document in documents]
-    for metadata in metadatas:
-        metadata["source"] = metadata["tweet_id"]
-        metadata.pop("tweet_id")
-
     return metadatas
 
 

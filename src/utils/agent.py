@@ -1,5 +1,4 @@
 import atexit
-import os
 import sys
 import json
 from rich.console import Console
@@ -18,21 +17,19 @@ from src.utils.data_processing import (
     get_metadatas_from_documents,
 )
 from src.utils.display import display_bot_answer, display_summary_and_questions
-from src.utils.document_loader import TwitterTweetLoader
+
 from src.utils.prompts import summarization_question_template, summarization_template
+from src.utils.document_loader import DocumentLoader
+from langchain.text_splitter import CharacterTextSplitter
 
 
-class TwitterAgent(object):
+class Agent(object):
     def __init__(
         self,
-        twitter_users,
-        keywords,
-        number_tweets,
-        persist_db=True,
+        loader: DocumentLoader,
+        persist_db: bool = True,
     ):
-        self.twitter_users = twitter_users
-        self.keywords = keywords
-        self.number_tweets = number_tweets
+        self.loader = loader
         self.loaded_documents = []
         self.embeddings = OpenAIEmbeddings()
         self.persist_db = persist_db
@@ -51,15 +48,6 @@ class TwitterAgent(object):
 
         atexit.register(save_history)
 
-    def _get_tweets_loader(self):
-        loader = TwitterTweetLoader.from_bearer_token(
-            oauth2_bearer_token=os.environ.get("TWITTER_BEARER_TOKEN"),
-            number_tweets=self.number_tweets,
-            twitter_users=self.twitter_users,
-            keywords=self.keywords,
-        )
-        return loader
-
     def _get_number_of_tokens(self):
         encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
         texts = [doc.page_content for doc in self.loaded_documents]
@@ -68,25 +56,12 @@ class TwitterAgent(object):
         num_tokens = len(encoding.encode(formatted_summary_template))
         return num_tokens
 
-    def load_tweets(self):
-        loader = self._get_tweets_loader()
-        with self.console.status(
-            "Loading Tweets",
-            spinner="aesthetic",
-            speed=1.5,
-            spinner_style="red",
-        ):
-            documents = loader.load()
-        logger.info(f"{len(documents)} tweets are loaded ...")
-        self.loaded_documents = documents
+    def load_documents(self):
+        text_splitter = CharacterTextSplitter(chunk_size=2000)
 
-        self.history["search_type"] = (
-            "keywords" if self.keywords is not None else "twitter_accounts"
+        self.loaded_documents = text_splitter.split_documents(
+            self.loader.load(console=self.console, history=self.history)
         )
-        self.history["input_query"] = (
-            self.keywords if self.keywords is not None else self.twitter_users
-        )
-        self.history["num_tweets"] = len(documents)
 
     def init_docsearch(self):
         texts = get_texts_from_documents(self.loaded_documents)
@@ -136,7 +111,7 @@ class TwitterAgent(object):
                     summary = response["answer"]
 
         else:
-            raise ValueError("Document are not loaded yet. Run `load_tweets` first.")
+            raise ValueError("Document are not loaded yet. Run `load` first.")
 
         try:
             structured_summary = json.loads(summary)

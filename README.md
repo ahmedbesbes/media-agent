@@ -1,19 +1,19 @@
-## Twitter Agent 
-Twitter Agent is CLI that scrapes tweets, summarizes them, and chats with them in an interactive terminal.
+## Twitter Reddit Agent 
+Twitter Reddit Agent is CLI that scrapes tweets/reddit submissions, summarizes them, and chats with them in an interactive terminal.
 
 ---
 
+![image](https://github.com/syltruong/twitter-reddit-agent/assets/24707558/b4885c0a-b5b4-48c0-9590-ba8bb809c724)
 
-![twitter-agent](./assets/twitter_agent.png)
 
 ### Functionalities
 
-- Scrapes tweets on your behalf either from a list of 
+- Scrapes tweets/submissions on your behalf either from a list of 
 user accounts or a list of keywords.
-- Embeds the tweets using OpenAI 
+- Embeds the tweets/submissions using OpenAI 
 - Indexes the embeddings (i.e. *vectors*) in ChromaDB
 - Enriches the index with additional metadata
-- Creates a summary of the tweets and provides  potential questions to answer
+- Creates a summary of the tweets/submissions and provides potential questions to answer
 - Opens a chat session on top of the tweets
 - Saves the conversation with its metadata
 - A rich terminal UI and logging features
@@ -30,6 +30,7 @@ user accounts or a list of keywords.
 ### Third party services
 * OpenAI (🔑 needed)
 * Twitter (🔑 needed)
+* Reddit (🔑 needed)
 
 ### Run the app locally
 
@@ -43,9 +44,10 @@ Create .env file at the root of the project with the following keys:
 
 ```
 OPENAI_API_KEY=<OPENAI KEY>
-TWITTER_API_KEY=<TWITTER API KEY>
-TWITTER_API_KEY_SECRET=<TWITTER API KEY SECRET>
 TWITTER_BEARER_TOKEN=<TWITTER BEARER TOKEN>
+REDDIT_API_CLIENT_ID=<REDDIT_API_CLIENT_ID>
+REDDIT_API_SECRET=<REDDIT_API_SECRET>
+REDDIT_USER_AGENT=<REDDIT_USER_AGENT>
 ```
 
 More info on these credentials [here](https://openai.com/) and [here](https://developer.twitter.com/en/docs/apps/overview).

@@ -1,9 +1,15 @@
 """Twitter document loader."""
 from __future__ import annotations
+import os
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Union
 
+from praw import Reddit
+from praw.models import Submission, MoreComments
+from rich.console import Console
+from contextlib import nullcontext
+
 from langchain.docstore.document import Document
-from langchain.document_loaders.base import BaseLoader
 
 from src.utils.search import (
     search_tweets_by_keywords,
@@ -25,7 +31,50 @@ def _dependable_tweepy_import() -> tweepy:
     return tweepy
 
 
-class TwitterTweetLoader(BaseLoader):
+class DocumentLoader(ABC):
+    @property
+    @abstractmethod
+    def source(self) -> str:
+        pass
+
+    @abstractmethod
+    def _load(self) -> List[Document]:
+        pass
+
+    @abstractmethod
+    def _get_search_params(self) -> Dict[str, Any]:
+        pass
+
+    def load(
+        self,
+        console: Optional[Console] = None,
+        history: Optional[Dict[str, Any]] = None,
+    ) -> List[Document]:
+        """Load documents."""
+
+        context = (
+            nullcontext
+            if console is None
+            else console.status(
+                "Loading Documents",
+                spinner="aesthetic",
+                speed=1.5,
+                spinner_style="red",
+            )
+        )
+
+        with context:
+            documents = self._load()
+
+        if history:
+            history["search_params"] = self._get_search_params()
+            history["num_documents"] = len(documents)
+            history["source"] = self.source
+
+        return documents
+
+
+class TwitterTweetLoader(DocumentLoader):
     """Twitter tweets loader.
     Read tweets of user twitter handle.
 
@@ -54,7 +103,11 @@ class TwitterTweetLoader(BaseLoader):
         else:
             self.search_mode = "twitter_users"
 
-    def load(self):
+    @property
+    def source(self) -> str:
+        return "twitter"
+
+    def _load(self):
         """Load tweets."""
         tweepy = _dependable_tweepy_import()
         api = tweepy.API(self.auth, parser=tweepy.parsers.JSONParser())
@@ -77,6 +130,19 @@ class TwitterTweetLoader(BaseLoader):
         results = self._format_tweets(tweets)
         return results
 
+    def _get_search_params(self) -> Dict[str, Any]:
+        ret = dict(
+            number_tweets=self.number_tweets,
+            search_mode=self.search_mode,
+        )
+
+        if self.search_mode == "twitter_users":
+            ret["twitter_users"] = self.twitter_users
+        else:
+            ret["keywords"] = self.keywords
+
+        return ret
+
     def _format_tweets(self, tweets: List[Dict[str, Any]]):
         """Format tweets into a string."""
         documents = []
@@ -84,6 +150,7 @@ class TwitterTweetLoader(BaseLoader):
             metadata = {
                 "created_at": tweet["created_at"],
                 "tweet_id": tweet["id"],
+                "source": tweet["id"],
             }
 
             document = Document(
@@ -136,3 +203,95 @@ class TwitterTweetLoader(BaseLoader):
             keywords=keywords,
             number_tweets=number_tweets,
         )
+
+
+class RedditSubLoader(DocumentLoader):
+    def __init__(
+        self,
+        number_submissions: int,
+        subreddits: Optional[List[str]] = None,
+        keywords: Optional[List[str]] = None,
+    ):
+        self.reddit = Reddit(
+            client_id=os.environ.get("REDDIT_API_CLIENT_ID"),
+            client_secret=os.environ.get("REDDIT_API_SECRET"),
+            user_agent=os.environ.get("REDDIT_USER_AGENT"),
+        )
+
+        self.subreddits = subreddits
+        self.keywords = keywords
+        self.number_submissions = number_submissions
+
+        if self.keywords is None and self.subreddits is None:
+            raise ValueError("You should at least one of keywords or subreddits")
+        if self.keywords is not None:
+            self.search_mode = "keywords"
+        else:
+            self.search_mode = "subreddits"
+
+    @property
+    def source(self) -> str:
+        return "reddit"
+
+    def _load(self) -> List[Document]:
+        """Load submissions."""
+
+        if self.search_mode == "subreddits":
+            submissions = self._search_subreddits()
+        elif self.search_mode == "keywords":
+            submissions = self._search_keywords()
+
+        documents = self._format_submissions(submissions)
+        return documents
+
+    def _format_submissions(self, submissions: List[Submission]) -> List[Document]:
+        N_LIMIT_COMMENTS = 10
+
+        ret = []
+
+        for sub in submissions:
+            comments = []
+
+            for top_level_comment in sub.comments:
+                if isinstance(top_level_comment, MoreComments):
+                    continue
+                comments.append(top_level_comment.body)
+                if len(comments) > N_LIMIT_COMMENTS:
+                    break
+
+            doc = Document(
+                page_content=" ".join([sub.title, sub.selftext, *comments]),
+                metadata=dict(
+                    title=sub.title,
+                    subreddit=sub.subreddit.display_name,
+                    id=sub.id,
+                    source=sub.url,
+                    url=sub.url,
+                    created_utc=sub.created_utc,
+                ),
+            )
+
+            ret.append(doc)
+
+        return ret
+
+    def _search_subreddits(self) -> List[Submission]:
+        subreddit = self.reddit.subreddit("+".join(self.subreddits))
+        return list(subreddit.top(limit=self.number_submissions))
+
+    def _search_keywords(self) -> List[Submission]:
+        subreddit = self.reddit.subreddit("all")
+        return list(subreddit.search(self.keywords, limit=self.number_submissions))
+
+    def _get_search_params(self) -> Dict[str, Any]:
+        ret = dict(
+            number_submissions=self.number_submissions,
+            search_mode=self.search_mode,
+        )
+
+        if self.search_mode == "subreddits":
+            ret["subreddits"] = self.subreddits
+        else:
+            ret["keywords"] = self.keywords
+
+        return ret
