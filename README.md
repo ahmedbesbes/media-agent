@@ -55,6 +55,11 @@ REDDIT_USER_AGENT=<REDDIT_USER_AGENT>
 
 More info on these credentials [here](https://openai.com/), [here](https://developer.twitter.com/en/docs/apps/overview) and [here](https://www.geeksforgeeks.org/how-to-get-client_id-and-client_secret-for-python-reddit-api-registration/)
 
+* Run the app
+
+```bash
+make run-media-agent
+```
 
 ### Future features:
 
