@@ -3,8 +3,9 @@ Media Agent is scrapes Twitter and Reddit submissions, summarizes them, and chat
 
 ---
 
-![image](./assets/media_agent.png)
+<!-- ![image](./assets/media_agent.png) -->
 
+<src img="./assets/media_agent.png"/>
 
 ### Functionalities
 
