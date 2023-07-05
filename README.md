@@ -1,9 +1,9 @@
-## Twitter Reddit Agent 
-Twitter Reddit Agent is CLI that scrapes tweets/reddit submissions, summarizes them, and chats with them in an interactive terminal.
+## Media Agent 
+Media Agent is scrapes Twitter and Reddit submissions, summarizes them, and chats with them in an interactive terminal.
 
 ---
 
-![image](https://github.com/syltruong/twitter-reddit-agent/assets/24707558/b4885c0a-b5b4-48c0-9590-ba8bb809c724)
+![image](./assets/media_agent.png)
 
 
 ### Functionalities
@@ -24,6 +24,7 @@ user accounts or a list of keywords.
 * **Langchain** 🦜 to build and compose LLMs
 * **ChromaDB** to store vectors (a.k.a embeddings) and query them to build conversational bots
 * **Tweepy** to connect to your the Twitter API and extract Tweets and metadata
+* **Praw** to connect to Reddit API
 * **Rich** to build a cool terminal UX/UI
 * **Poetry** to manage dependencies
 
@@ -36,13 +37,15 @@ user accounts or a list of keywords.
 
 * Install dependencies with poetry
 
+```bash
 poetry install --with dev
+```
 
 * Add API credentials
 
 Create .env file at the root of the project with the following keys:
 
-```
+```bash
 OPENAI_API_KEY=<OPENAI KEY>
 TWITTER_BEARER_TOKEN=<TWITTER BEARER TOKEN>
 REDDIT_API_CLIENT_ID=<REDDIT_API_CLIENT_ID>
@@ -50,7 +53,7 @@ REDDIT_API_SECRET=<REDDIT_API_SECRET>
 REDDIT_USER_AGENT=<REDDIT_USER_AGENT>
 ```
 
-More info on these credentials [here](https://openai.com/) and [here](https://developer.twitter.com/en/docs/apps/overview).
+More info on these credentials [here](https://openai.com/), [here](https://developer.twitter.com/en/docs/apps/overview) and [here](https://www.geeksforgeeks.org/how-to-get-client_id-and-client_secret-for-python-reddit-api-registration/)
 
 
 ### Future features:
@@ -59,9 +62,9 @@ This is an on-going project, so feel free to contribute:
 
 Here's what I plan in the near future:
 
-* support other LLMs (Falcon?)
-* support Pinecone as an alternative to ChromaDB
-* support Twint as an alternative to Tweepy (in case the Twitter API reaches its limit in terms of calls)
+* Add more data sources: substack, press, LinkedIN
+* support open-source LLMs (Falcon?)
+* support Pinecone in addition to ChromaDB
 * add instructions to deployment on a cloud infrastructure
 * improve the prompts to have a more engaging/enriching conversations
 * add actions to open URLs and fetch content from it
