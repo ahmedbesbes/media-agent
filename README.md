@@ -1,6 +1,6 @@
 # Media Agent 
 
-Media Agent is scrapes Twitter and Reddit submissions, summarizes them, and chats with them in an interactive terminal.
+Media Agent scrapes Twitter and Reddit submissions, summarizes them, and chats with them in an interactive terminal.
 
 ---
 
@@ -9,8 +9,9 @@ Media Agent is scrapes Twitter and Reddit submissions, summarizes them, and chat
 </p>
 
 ### Demo
-
-https://www.loom.com/share/f4954e7d34ef4b7b8491e2bf910e8521
+<p align="center">
+  https://www.loom.com/share/f4954e7d34ef4b7b8491e2bf910e8521
+</p>
 
 ### Functionalities
 
