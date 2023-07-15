@@ -276,8 +276,16 @@ class RedditSubLoader(DocumentLoader):
         return ret
 
     def _search_subreddits(self) -> List[Submission]:
+        """Fetch Daily top submissions from subreddidts.
+
+        Returns
+        -------
+        List[Submission]
+            list of submissions
+        """
+
         subreddit = self.reddit.subreddit("+".join(self.subreddits))
-        return list(subreddit.top(limit=self.number_submissions))
+        return list(subreddit.top(limit=self.number_submissions, time_filter="day"))
 
     def _search_keywords(self) -> List[Submission]:
         subreddit = self.reddit.subreddit("all")
