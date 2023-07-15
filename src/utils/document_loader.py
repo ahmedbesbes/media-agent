@@ -246,35 +246,32 @@ class RedditSubLoader(DocumentLoader):
         return documents
 
     def _format_submissions(self, submissions: List[Submission]) -> List[Document]:
-        N_LIMIT_COMMENTS = 10
-
         ret = []
 
         for sub in submissions:
-            comments = []
+            ret.append(self._format_submission(sub))
 
-            for top_level_comment in sub.comments:
-                if isinstance(top_level_comment, MoreComments):
-                    continue
-                comments.append(top_level_comment.body)
-                if len(comments) > N_LIMIT_COMMENTS:
-                    break
-
-            doc = Document(
-                page_content=" ".join([sub.title, sub.selftext, *comments]),
-                metadata=dict(
-                    title=sub.title,
-                    subreddit=sub.subreddit.display_name,
-                    id=sub.id,
-                    source=sub.url,
-                    url=sub.url,
-                    created_utc=sub.created_utc,
-                ),
-            )
-
-            ret.append(doc)
+            for comment in sub.comments.list():
+                ret.append(self._format_comment(comment))
 
         return ret
+
+    def _format_submission(self, submission: Submission) -> Document:
+        """Format a submission into a Document"""
+
+        return Document(
+            page_content="\n".join([submission.title, submission.selftext]),
+            metadata=dict(
+                id=submission.id,
+                upvotes=submission.ups,
+                permalink="reddit.com" + submission.permalink,
+                created_utc=datetime.fromtimestamp(submission.created_utc),
+                author_karma=submission.author.comment_karma,
+                contains_url=submission.url is not None and len(submission.url) > 0,
+                contains_media=submission.media is not None
+                and len(submission.media) > 0,
+            ),
+        )
 
     def _format_comment(self, comment: Comment) -> Document:
         """Format a comment into a Document"""
@@ -296,6 +293,7 @@ a redditor with a karma count of {author.comment_karma} posted a comment which g
                 upvotes=comment.ups,
                 permalink="reddit.com" + comment.permalink,
                 created_utc=datetime.fromtimestamp(comment.created_utc),
+                author_karma=author.comment_karma,
             ),
         )
 
