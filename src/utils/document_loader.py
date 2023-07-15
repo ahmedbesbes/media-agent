@@ -2,10 +2,11 @@
 from __future__ import annotations
 import os
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
+from datetime import datetime
 from praw import Reddit
-from praw.models import Submission, MoreComments
+from praw.models import Submission, MoreComments, Comment
 from rich.console import Console
 from contextlib import nullcontext
 
@@ -274,6 +275,29 @@ class RedditSubLoader(DocumentLoader):
             ret.append(doc)
 
         return ret
+
+    def _format_comment(self, comment: Comment) -> Document:
+        """Format a comment."""
+
+        submission = comment.submission
+        author = comment.author
+
+        page_content = f"""
+To the post '{submission.title}' with {submission.ups} upvotes,
+a redditor with a karma count of {author.comment_karma} posted a comment which gathered {comment.ups} upvotes:
+```
+{comment.body}
+```
+"""
+        return Document(
+            page_content=page_content,
+            metadata=dict(
+                id=comment.id,
+                upvotes=comment.ups,
+                permalink="reddit.com" + comment.permalink,
+                created_utc=datetime.fromtimestamp(comment.created_utc),
+            ),
+        )
 
     def _search_subreddits(self) -> List[Submission]:
         """Fetch Daily top submissions from subreddidts.
