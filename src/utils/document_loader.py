@@ -277,7 +277,7 @@ class RedditSubLoader(DocumentLoader):
         return ret
 
     def _format_comment(self, comment: Comment) -> Document:
-        """Format a comment."""
+        """Format a comment into a Document"""
 
         submission = comment.submission
         author = comment.author
