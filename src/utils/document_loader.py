@@ -252,7 +252,10 @@ class RedditSubLoader(DocumentLoader):
             ret.append(self._format_submission(sub))
 
             for comment in sub.comments.list():
-                ret.append(self._format_comment(comment))
+                try:
+                    ret.append(self._format_comment(comment))
+                except DeletedPostException:
+                    pass
 
         return ret
 
@@ -265,16 +268,22 @@ class RedditSubLoader(DocumentLoader):
                 id=submission.id,
                 upvotes=submission.ups,
                 permalink="reddit.com" + submission.permalink,
-                created_utc=datetime.fromtimestamp(submission.created_utc),
+                source="reddit.com" + submission.permalink,
+                created_utc=str(datetime.fromtimestamp(submission.created_utc)),
                 author_karma=submission.author.comment_karma,
-                contains_url=submission.url is not None and len(submission.url) > 0,
-                contains_media=submission.media is not None
+                contains_url=int(
+                    submission.url is not None and len(submission.url) > 0
+                ),
+                contains_media=int(submission.media is not None)
                 and len(submission.media) > 0,
             ),
         )
 
     def _format_comment(self, comment: Comment) -> Document:
         """Format a comment into a Document"""
+
+        if comment.author is None:
+            raise DeletedPostException()
 
         submission = comment.submission
         author = comment.author
@@ -292,7 +301,8 @@ a redditor with a karma count of {author.comment_karma} posted a comment which g
                 id=comment.id,
                 upvotes=comment.ups,
                 permalink="reddit.com" + comment.permalink,
-                created_utc=datetime.fromtimestamp(comment.created_utc),
+                source="reddit.com" + submission.permalink,
+                created_utc=str(datetime.fromtimestamp(comment.created_utc)),
                 author_karma=author.comment_karma,
             ),
         )
@@ -325,3 +335,7 @@ a redditor with a karma count of {author.comment_karma} posted a comment which g
             ret["keywords"] = self.keywords
 
         return ret
+
+
+class DeletedPostException(Exception):
+    pass
