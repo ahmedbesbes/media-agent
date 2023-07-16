@@ -12,10 +12,6 @@ from src.utils.chains import (
     get_retrieval_qa_chain,
     summarize_tweets,
 )
-from src.utils.data_processing import (
-    get_texts_from_documents,
-    get_metadatas_from_documents,
-)
 from src.utils.display import display_bot_answer, display_summary_and_questions
 
 from src.utils.prompts import summarization_question_template, summarization_template
@@ -64,13 +60,9 @@ class Agent(object):
         )
 
     def init_docsearch(self):
-        texts = get_texts_from_documents(self.loaded_documents)
-        metadatas = get_metadatas_from_documents(self.loaded_documents)
-
-        self.docsearch = Chroma.from_texts(
-            texts,
-            self.embeddings,
-            metadatas=metadatas,
+        self.docsearch = Chroma.from_documents(
+            documents=self.loaded_documents,
+            embedding=self.embeddings,
             persist_directory="db",
         )
 
