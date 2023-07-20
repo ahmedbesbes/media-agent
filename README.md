@@ -68,9 +68,10 @@ More info on these credentials [here](https://openai.com/), [here](https://devel
 make run-media-agent
 ```
 
-### Stars history 🌠
+## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=ahmedbesbes/media-agent&type=Timeline)](https://star-history.com/#ahmedbesbes/media-agent&Timeline)
+
 
 ### Future features:
 
