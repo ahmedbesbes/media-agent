@@ -2,10 +2,11 @@
 from __future__ import annotations
 import os
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
+from datetime import datetime
 from praw import Reddit
-from praw.models import Submission, MoreComments
+from praw.models import Submission, Comment
 from rich.console import Console
 from contextlib import nullcontext
 
@@ -209,6 +210,7 @@ class RedditSubLoader(DocumentLoader):
     def __init__(
         self,
         number_submissions: int,
+        limit_comments_per_submission: int,
         subreddits: Optional[List[str]] = None,
         keywords: Optional[List[str]] = None,
     ):
@@ -221,6 +223,7 @@ class RedditSubLoader(DocumentLoader):
         self.subreddits = subreddits
         self.keywords = keywords
         self.number_submissions = number_submissions
+        self.limit_comments_per_submission = limit_comments_per_submission
 
         if self.keywords is None and self.subreddits is None:
             raise ValueError("You should at least one of keywords or subreddits")
@@ -245,39 +248,83 @@ class RedditSubLoader(DocumentLoader):
         return documents
 
     def _format_submissions(self, submissions: List[Submission]) -> List[Document]:
-        N_LIMIT_COMMENTS = 10
-
         ret = []
 
         for sub in submissions:
-            comments = []
+            if sub.author is None or (
+                hasattr(sub.author, "is_suspended") and sub.author.is_suspended
+            ):
+                continue
 
-            for top_level_comment in sub.comments:
-                if isinstance(top_level_comment, MoreComments):
+            ret.append(self._format_submission(sub))
+
+            count_comments = 0
+
+            for comment in sub.comments.list():
+                if comment.author is None or (
+                    hasattr(comment.author, "is_suspended")
+                    and comment.author.is_suspended
+                ):
                     continue
-                comments.append(top_level_comment.body)
-                if len(comments) > N_LIMIT_COMMENTS:
+
+                ret.append(self._format_comment(comment))
+                count_comments += 1
+
+                if count_comments > self.limit_comments_per_submission:
                     break
-
-            doc = Document(
-                page_content=" ".join([sub.title, sub.selftext, *comments]),
-                metadata=dict(
-                    title=sub.title,
-                    subreddit=sub.subreddit.display_name,
-                    id=sub.id,
-                    source=sub.url,
-                    url=sub.url,
-                    created_utc=sub.created_utc,
-                ),
-            )
-
-            ret.append(doc)
 
         return ret
 
+    def _format_submission(self, submission: Submission) -> Document:
+        """Format a submission into a Document"""
+
+        return Document(
+            page_content="\n".join([submission.title, submission.selftext]),
+            metadata=dict(
+                id=submission.id,
+                upvotes=submission.ups,
+                permalink="reddit.com" + submission.permalink,
+                source="reddit.com" + submission.permalink,
+                created_utc=str(datetime.fromtimestamp(submission.created_utc)),
+                author_karma=submission.author.comment_karma,
+                contains_url=int(
+                    submission.url is not None and len(submission.url) > 0
+                ),
+                contains_media=int(submission.media is not None)
+                and len(submission.media) > 0,
+            ),
+        )
+
+    def _format_comment(self, comment: Comment) -> Document:
+        """Format a comment into a Document"""
+
+        submission = comment.submission
+        author = comment.author
+
+        page_content = comment.body
+        return Document(
+            page_content=page_content,
+            metadata=dict(
+                id=comment.id,
+                upvotes=comment.ups,
+                permalink="reddit.com" + comment.permalink,
+                source="reddit.com" + submission.permalink,
+                created_utc=str(datetime.fromtimestamp(comment.created_utc)),
+                author_karma=author.comment_karma,
+            ),
+        )
+
     def _search_subreddits(self) -> List[Submission]:
+        """Fetch Daily top submissions from subreddidts.
+
+        Returns
+        -------
+        List[Submission]
+            list of submissions
+        """
+
         subreddit = self.reddit.subreddit("+".join(self.subreddits))
-        return list(subreddit.top(limit=self.number_submissions))
+        return list(subreddit.top(limit=self.number_submissions, time_filter="day"))
 
     def _search_keywords(self) -> List[Submission]:
         subreddit = self.reddit.subreddit("all")

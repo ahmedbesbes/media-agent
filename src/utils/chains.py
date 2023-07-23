@@ -1,8 +1,11 @@
+from typing import List
 from langchain.chains import RetrievalQAWithSourcesChain
+from langchain.schema import Document
 from langchain.chat_models import ChatOpenAI
 from langchain.chains.summarize import load_summarize_chain
+from langchain.vectorstores.base import VectorStoreRetriever
 from langchain.prompts import PromptTemplate
-from src.utils.prompts import summarization_template
+from src.utils.prompts import PromptGenerator, PromptMethod
 
 
 def get_retrieval_qa_chain(retriever):
@@ -12,9 +15,6 @@ def get_retrieval_qa_chain(retriever):
         retriever=retriever,
     )
     return chain
-
-
-### Summarization
 
 
 def get_summarization_chain(prompt):
@@ -27,8 +27,28 @@ def get_summarization_chain(prompt):
     return chain
 
 
-def summarize_tweets(docs):
-    prompt = PromptTemplate(template=summarization_template, input_variables=["text"])
-    chain = get_summarization_chain(prompt)
-    summary = chain.run(docs)
-    return summary
+def summarize_tweets(
+    docs: List[Document],
+    retriever: VectorStoreRetriever,
+    method: PromptMethod,
+    prompt_generator: PromptGenerator,
+):
+    template = prompt_generator.get_summarization_template(method=method)
+
+    if method == PromptMethod.stuff:
+        prompt = PromptTemplate(template=template, input_variables=["text"])
+        chain = get_summarization_chain(prompt)
+        summary = chain.run(docs)
+        return summary
+
+    if method == PromptMethod.retrievalqa:
+        chain = get_retrieval_qa_chain(retriever=retriever)
+        response = chain(
+            {
+                "question": template,
+            },
+        )
+        summary = response["answer"]
+        return summary
+
+    raise ValueError(f"Unknown method: {method}")
