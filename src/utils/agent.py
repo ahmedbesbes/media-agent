@@ -14,7 +14,7 @@ from src.utils.chains import (
 )
 from src.utils.display import display_bot_answer, display_summary_and_questions
 
-from src.utils.prompts import summarization_question_template, summarization_template
+from src.utils.prompts import PromptGenerator, PromptMethod
 from src.utils.document_loader import DocumentLoader
 from langchain.text_splitter import CharacterTextSplitter
 
@@ -23,13 +23,16 @@ class Agent(object):
     def __init__(
         self,
         loader: DocumentLoader,
+        prompt_generator: PromptGenerator,
         persist_db: bool = True,
     ):
         self.loader = loader
+        self.prompt_generator = prompt_generator
         self.loaded_documents = []
         self.embeddings = OpenAIEmbeddings()
         self.persist_db = persist_db
         self.chain = None
+        self.retriever = None
         self.client = None
         self.collection = None
         self.console = Console()
@@ -48,6 +51,9 @@ class Agent(object):
         encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
         texts = [doc.page_content for doc in self.loaded_documents]
         text = "\n".join(texts)
+        summarization_template = self.prompt_generator.get_summarization_template(
+            method=PromptMethod.stuff
+        )
         formatted_summary_template = summarization_template.format(text=text)
         num_tokens = len(encoding.encode(formatted_summary_template))
         return num_tokens
@@ -65,10 +71,11 @@ class Agent(object):
             embedding=self.embeddings,
             persist_directory="db",
         )
+        self.retriever = self.docsearch.as_retriever()
 
         if self.persist_db:
             self.docsearch.persist()
-        self.chain = get_retrieval_qa_chain(self.docsearch.as_retriever())
+        self.chain = get_retrieval_qa_chain(self.retriever)
         self.client = chromadb.Client(
             Settings(
                 chroma_db_impl="duckdb+parquet",
@@ -78,32 +85,28 @@ class Agent(object):
         self.collection = self.client.get_collection("langchain")
 
     def summarize(self):
-        if self.loaded_documents is not None:
-            num_tokens = self._get_number_of_tokens()
-            if num_tokens <= 4097:
-                method = "stuff"
-            else:
-                method = "chromadb"
-
-            with self.console.status(
-                "Generating a summary of the loaded tweets ... ⌛ \n",
-                spinner="aesthetic",
-                speed=1.5,
-                spinner_style="red",
-            ):
-                if method == "stuff":
-                    summary = summarize_tweets(self.loaded_documents)
-
-                elif method == "chromadb":
-                    response = self.chain(
-                        {
-                            "question": summarization_question_template,
-                        },
-                    )
-                    summary = response["answer"]
-
-        else:
+        if self.loaded_documents is None:
             raise ValueError("Document are not loaded yet. Run `load` first.")
+
+        num_tokens = self._get_number_of_tokens()
+
+        if num_tokens <= 4097:
+            method = PromptMethod.stuff
+        else:
+            method = PromptMethod.retrievalqa
+
+        with self.console.status(
+            "Generating a summary of the loaded tweets ... ⌛ \n",
+            spinner="aesthetic",
+            speed=1.5,
+            spinner_style="red",
+        ):
+            summary = summarize_tweets(
+                docs=self.loaded_documents,
+                retriever=self.retriever,
+                method=method,
+                prompt_generator=self.prompt_generator,
+            )
 
         try:
             structured_summary = json.loads(summary)
