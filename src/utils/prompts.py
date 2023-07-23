@@ -18,7 +18,7 @@ class PromptGenerator(ABC):
         pass
 
 
-class TwiiterPromptGenerator(PromptGenerator):
+class TwitterPromptGenerator(PromptGenerator):
     @property
     def source(self) -> str:
         return "twitter"

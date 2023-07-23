@@ -10,7 +10,7 @@ from src.utils.display import (
 )
 from src.utils.agent import Agent
 from src.utils.document_loader import RedditSubLoader, TwitterTweetLoader
-from src.utils.prompts import RedditPromptGenerator, TwiiterPromptGenerator
+from src.utils.prompts import RedditPromptGenerator, TwitterPromptGenerator
 
 load_dotenv()
 
@@ -40,7 +40,7 @@ def main():
             keywords=keywords,
         )
 
-        prompt_generator = TwiiterPromptGenerator()
+        prompt_generator = TwitterPromptGenerator()
 
     else:
         raise ValueError(f"Platform {platform} not supported")
