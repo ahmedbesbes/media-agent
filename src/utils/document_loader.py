@@ -301,13 +301,7 @@ class RedditSubLoader(DocumentLoader):
         submission = comment.submission
         author = comment.author
 
-        page_content = f"""
-To the post '{submission.title}' with {submission.ups} upvotes,
-a redditor with a karma count of {author.comment_karma} posted a comment which gathered {comment.ups} upvotes:
-```
-{comment.body}
-```
-"""
+        page_content = comment.body
         return Document(
             page_content=page_content,
             metadata=dict(
