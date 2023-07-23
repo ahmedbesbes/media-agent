@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
 from datetime import datetime
 from praw import Reddit
-from praw.models import Submission, MoreComments, Comment
+from praw.models import Submission, Comment
 from rich.console import Console
 from contextlib import nullcontext
 
@@ -210,6 +210,7 @@ class RedditSubLoader(DocumentLoader):
     def __init__(
         self,
         number_submissions: int,
+        limit_comments_per_submission: int,
         subreddits: Optional[List[str]] = None,
         keywords: Optional[List[str]] = None,
     ):
@@ -222,6 +223,7 @@ class RedditSubLoader(DocumentLoader):
         self.subreddits = subreddits
         self.keywords = keywords
         self.number_submissions = number_submissions
+        self.limit_comments_per_submission = limit_comments_per_submission
 
         if self.keywords is None and self.subreddits is None:
             raise ValueError("You should at least one of keywords or subreddits")
@@ -249,13 +251,27 @@ class RedditSubLoader(DocumentLoader):
         ret = []
 
         for sub in submissions:
+            if sub.author is None or (
+                hasattr(sub.author, "is_suspended") and sub.author.is_suspended
+            ):
+                continue
+
             ret.append(self._format_submission(sub))
 
+            count_comments = 0
+
             for comment in sub.comments.list():
-                try:
-                    ret.append(self._format_comment(comment))
-                except DeletedPostException:
-                    pass
+                if comment.author is None or (
+                    hasattr(comment.author, "is_suspended")
+                    and comment.author.is_suspended
+                ):
+                    continue
+
+                ret.append(self._format_comment(comment))
+                count_comments += 1
+
+                if count_comments > self.limit_comments_per_submission:
+                    break
 
         return ret
 
@@ -281,9 +297,6 @@ class RedditSubLoader(DocumentLoader):
 
     def _format_comment(self, comment: Comment) -> Document:
         """Format a comment into a Document"""
-
-        if comment.author is None:
-            raise DeletedPostException()
 
         submission = comment.submission
         author = comment.author
@@ -335,7 +348,3 @@ a redditor with a karma count of {author.comment_karma} posted a comment which g
             ret["keywords"] = self.keywords
 
         return ret
-
-
-class DeletedPostException(Exception):
-    pass
