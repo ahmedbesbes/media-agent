@@ -6,9 +6,11 @@ from src.utils.display import (
     select_number_of_posts,
     select_topic,
     select_search_queries,
+    select_limit_comments_per_submission,
 )
 from src.utils.agent import Agent
 from src.utils.document_loader import RedditSubLoader, TwitterTweetLoader
+from src.utils.prompts import RedditPromptGenerator, TwiiterPromptGenerator
 
 load_dotenv()
 
@@ -20,11 +22,16 @@ def main():
     number_of_posts = select_number_of_posts()
 
     if platform == "reddit":
+        limit_comments_per_submission = select_limit_comments_per_submission()
         document_loader = RedditSubLoader(
             number_submissions=number_of_posts,
+            limit_comments_per_submission=limit_comments_per_submission,
             keywords=keywords,
             subreddits=accounts,
         )
+
+        prompt_generator = RedditPromptGenerator()
+
     elif platform == "twitter":
         document_loader = TwitterTweetLoader.from_bearer_token(
             oauth2_bearer_token=os.environ.get("TWITTER_BEARER_TOKEN"),
@@ -32,10 +39,13 @@ def main():
             twitter_users=accounts,
             keywords=keywords,
         )
+
+        prompt_generator = TwiiterPromptGenerator()
+
     else:
         raise ValueError(f"Platform {platform} not supported")
 
-    agent = Agent(loader=document_loader)
+    agent = Agent(loader=document_loader, prompt_generator=prompt_generator)
 
     agent.load_documents()
     agent.init_docsearch()

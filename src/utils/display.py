@@ -223,6 +223,28 @@ def select_number_of_posts():
     return number_of_tweets
 
 
+def select_limit_comments_per_submission():
+    default_post_number = 10
+    error = True
+    i = 0
+    while error:
+        if i != 0:
+            console.print("[red]Please enter an integer ⚠️[/red]")
+        number_of_comments = Prompt.ask(
+            f"Enter the max number of comments to fetch per submission ({default_post_number})",
+            default=default_post_number,
+        )
+        try:
+            number_of_comments = int(number_of_comments)
+            error = False
+        except ValueError:
+            error = True
+
+        i += 1
+
+    return number_of_comments
+
+
 def display_summary_and_questions(summary, q1, q2, q3):
     console.print("Summary 📝 \n", style="red bold underline")
     console.print(summary + "\n ")
